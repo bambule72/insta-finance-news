@@ -26,7 +26,7 @@ def test_extract_from_html_simple(monkeypatch):
     </html>
     """
 
-    def fake_get(url, timeout=10):
+    def fake_get(url, timeout=10, headers=None):
         return DummyResponse(html)
 
     session = types.SimpleNamespace()
@@ -38,7 +38,7 @@ def test_extract_from_html_simple(monkeypatch):
 
 
 def test_fetch_site_network_error(monkeypatch):
-    def fake_get(url, timeout=10):
+    def fake_get(url, timeout=10, headers=None):
         raise Exception("Network down")
 
     class S:

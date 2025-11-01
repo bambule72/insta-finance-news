@@ -1,0 +1,19 @@
+version: '3.8'
+services:
+  redis:
+    image: redis:7
+    container_name: insta-finance-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+  app:
+    build: .
+    container_name: insta-finance-news-app
+    depends_on:
+      - redis
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+    ports:
+      - "8080:8080"
+    command: ["functions-framework", "--target=scrape_news", "--port=8080"]
