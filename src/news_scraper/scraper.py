@@ -380,15 +380,39 @@ def _extract_from_filing_text(text: str) -> FormEntry:
                         val = cells[idx].strip() if idx < len(cells) else ''
                         if not val:
                             continue
-                        if re.search(r'number of shares|^shares$|\bshares\b', h):
+                        lh = h.lower()
+                        # shares outstanding (match first because headers often contain 'number of shares')
+                        if re.search(r'number of shares or other units outstanding|shares outstanding|\boutstanding\b', lh):
+                            if out.get('shares_outstanding') is None:
+                                out['shares_outstanding'] = _safe_int(val)
+                        # shares being sold (more specific 'to be sold')
+                        elif re.search(r'number of shares or other units to be sold|to be sold|number of shares to be sold', lh):
                             if out.get('shares') is None:
                                 out['shares'] = _safe_int(val)
-                        elif re.search(r'price per share|price\b|per share', h):
+                        # generic shares fallback
+                        elif re.search(r'number of shares|^shares$|\bshares\b', lh):
+                            if out.get('shares') is None:
+                                out['shares'] = _safe_int(val)
+                        # price per share
+                        elif re.search(r'price per share|price\b|per share', lh):
                             if out.get('price') is None:
                                 out['price'] = _normalize_number(val)
-                        elif re.search(r'aggregate market value|aggregate market|market value|value', h):
+                        # aggregate market value
+                        elif re.search(r'aggregate market value|aggregate market|market value|value', lh):
                             if out.get('value') is None:
                                 out['value'] = _normalize_number(val)
+                        # shares outstanding
+                        elif re.search(r'number of shares or other units outstanding|shares outstanding|outstanding', lh):
+                            if out.get('shares_outstanding') is None:
+                                out['shares_outstanding'] = _safe_int(val)
+                        # approximate date of sale
+                        elif re.search(r'approximate date of sale|date of sale|approximate date', lh):
+                            if out.get('approximate_date_of_sale') is None:
+                                out['approximate_date_of_sale'] = val
+                        # securities exchange
+                        elif re.search(r'name the securities exchange|securities exchange|exchange', lh):
+                            if out.get('securities_exchange') is None:
+                                out['securities_exchange'] = val
 
                     # If we found numeric data, stop scanning this table
                     if any(out.get(k) for k in ('shares', 'price', 'value')):
