@@ -11,10 +11,12 @@ The scraper has been refactored into a modular parser architecture that makes it
 The `BaseFormParser` abstract base class provides:
 
 **Required Methods:**
+
 - `form_type` property - Returns the SEC form type (e.g., "144", "8-K")
 - `parse()` method - Parses filing HTML and returns structured data
 
 **Shared Utilities:**
+
 - `normalize_number()` - Convert string to float
 - `safe_int()` - Convert string to int safely
 - `normalize_date()` - Convert dates to ISO format (YYYY-MM-DD)
@@ -27,11 +29,13 @@ The `BaseFormParser` abstract base class provides:
 Each SEC form type has its own parser class:
 
 **Form 144 Parser** (`src/news_scraper/parsers/form144.py`)
+
 - Handles insider intent to sell filings
 - Extracts: shares, price, value, reporting owner, dates, exchange
 - Auto-registers with the parser registry
 
 **Future Parsers:**
+
 - Form 8-K - Material events (to be implemented)
 - Form 4 - Insider transactions (to be implemented)
 - Form 13D - Activist ownership (to be implemented)
@@ -49,6 +53,7 @@ result = parser.parse(html, index_url, doc_url)
 ```
 
 **Key Functions:**
+
 - `register_parser(form_type, parser_class)` - Register a new parser
 - `get_parser(form_type)` - Get parser instance for a form type
 - `get_supported_forms()` - List all supported form types
@@ -58,14 +63,17 @@ result = parser.parse(html, index_url, doc_url)
 Structured type definitions using TypedDict:
 
 **Base Types:**
+
 - `BaseFormEntry` - Common fields (issuer, ticker, URLs, dates)
 
 **Form-Specific Types:**
+
 - `Form144Entry` - Extends base with shares, price, value, owner
 - `Form8KEntry` - Extends base with event type, description (future)
 - `Form4Entry` - Extends base with transaction details (future)
 
 **Union Type:**
+
 - `FormEntry` - Union of all form types for flexibility
 
 ## How to Add a New Form Parser
@@ -82,7 +90,7 @@ class Form8KParser(BaseFormParser):
     @property
     def form_type(self) -> str:
         return "8-K"
-    
+
     def parse(self, filing_html: str, index_url: str, document_url: str) -> Form8KEntry:
         out: Form8KEntry = {
             "form_type": "8-K",
@@ -95,10 +103,10 @@ class Form8KParser(BaseFormParser):
             "document_url": document_url,
             "source": "sec_form_8k",
         }
-        
+
         # Your parsing logic here
         # Use self.normalize_date(), self.normalize_number(), etc.
-        
+
         return out
 
 # Register the parser
@@ -175,6 +183,7 @@ def test_form8k_parsing():
 ## Current Status
 
 ✅ **Implemented:**
+
 - Base parser infrastructure
 - Form 144 parser
 - Parser registry
@@ -182,6 +191,7 @@ def test_form8k_parsing():
 - All tests passing
 
 🔜 **Next Steps:**
+
 - Implement Form 8-K parser (highest market impact)
 - Implement Form 4 parser (insider trading)
 - Implement Form 13D parser (activist ownership)

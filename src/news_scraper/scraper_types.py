@@ -11,6 +11,7 @@ class BaseFormEntry(TypedDict, total=False):
     document_url: Optional[str]
     source: Optional[str]
     filing_date: Optional[str]
+    accepted_date: Optional[str]  # SEC acceptance timestamp
     form_type: Optional[str]
 
 

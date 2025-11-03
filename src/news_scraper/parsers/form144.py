@@ -54,6 +54,8 @@ class Form144Parser(BaseFormParser):
             "shares_outstanding": None,
             "issuer_name": None,
             "ticker": None,
+            "filing_date": None,
+            "accepted_date": None,
             "index_url": index_url,
             "document_url": document_url,
             "source": "sec_form_144",

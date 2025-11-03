@@ -3,6 +3,7 @@
 This microservice is designed to run as an HTTP-triggered Cloud Function.
 
 Prerequisites
+
 - Google Cloud SDK installed and authenticated.
 - Billing/project set up.
 
@@ -21,6 +22,7 @@ gcloud functions deploy scrape_news \
 ```
 
 Notes
+
 - Ensure `requirements.txt` is present in the function root. Cloud Functions installs packages listed there.
 - For local testing use the Functions Framework:
   ```bash

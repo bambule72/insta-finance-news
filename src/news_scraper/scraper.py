@@ -21,6 +21,7 @@ from bs4 import BeautifulSoup
 from .scraper_types import FormEntry, Form144Entry
 from . import company_tickers
 from .logger import setup_logger
+from .form_fetcher import fetch_sec_form
 
 # Import parsers to register them
 from .parsers.form144 import Form144Parser
@@ -205,50 +206,30 @@ def get_latest_news(sources: List[str] | None = None) -> List[Dict]:
 def get_latest_sec_form_144(limit: int = 10) -> List[Form144Entry]:
     """Fetch the SEC Form 144 atom feed, download filing documents, and return extracted items.
 
-    This mirrors the debug helper but returns structured items for use by the CLI.
+    This is a convenience wrapper around the generic fetch_sec_form function.
     """
-    session = requests.Session()
     feed_url = RSS_FEEDS.get('sec_form_144')
     if not feed_url:
         return []
-    try:
-        feed_body = _request_with_retries(feed_url, session=session, headers=SITE_HEADERS.get('sec_form_144'))
-    except Exception:
-        return []
-
-    parsed = feedparser.parse(feed_body)
-    entries = getattr(parsed, 'entries', [])[:limit]
-    results: List[Form144Entry] = []
     
-    # Get Form 144 parser
-    parser = get_parser("144")
+    headers = SITE_HEADERS.get('sec_form_144')
+    results = fetch_sec_form(
+        form_type="144",
+        feed_url=feed_url,
+        headers=headers,
+        limit=limit
+    )
     
-    for e in entries:
-        index_url = getattr(e, 'link', None) or getattr(e, 'id', None)
-        if not index_url:
-            continue
-        try:
-            index_html = _request_with_retries(index_url, session=session, headers=SITE_HEADERS.get('sec_form_144'))
-            doc_url = _find_filing_document_link(index_html, index_url)
-            if not doc_url:
-                continue
-            filing_html = _request_with_retries(doc_url, session=session, headers=SITE_HEADERS.get('sec_form_144'))
-            
-            # Use the parser instead of _extract_from_filing_text
-            extracted = parser.parse(filing_html, index_url, doc_url)
-            
-            if extracted and any(v is not None for v in extracted.values()):
-                results.append(extracted)
-        except Exception:
-            # skip individual failures
-            continue
-    
-    # Deduplicate entries by document URL before returning
-    return _dedup_form144_entries(results)
+    # Type cast for return type (results are Form144Entry dicts)
+    return results  # type: ignore
 
 
 def _dedup_form144_entries(entries: List[Form144Entry]) -> List[Form144Entry]:
-    """Remove duplicate Form 144 filings based on document URL."""
+    """Remove duplicate Form 144 filings based on document URL.
+    
+    DEPRECATED: Use form_fetcher._deduplicate_entries instead.
+    Kept for backward compatibility with tests.
+    """
     seen_urls = set()
     deduped = []
     for e in entries:
