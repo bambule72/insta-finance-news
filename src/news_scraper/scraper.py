@@ -7,14 +7,6 @@ from __future__ import annotations
 
 import time
 from typing import List, Dict, Optional, cast
-"""Scraper for SEC Form 144 filings.
-
-This module provides functions to fetch and parse Form 144 filings from SEC EDGAR,
-extracting structured data about proposed stock sales.
-"""
-
-import time
-from typing import List, Dict, Optional, cast
 import random
 import urllib.robotparser
 import urllib.parse
@@ -275,6 +267,28 @@ def _normalize_number(s: str) -> Optional[float]:
 def _safe_int(s: str) -> Optional[int]:
     v = _normalize_number(s)
     return int(v) if v is not None else None
+
+
+import datetime
+
+def _normalize_date(date_str: str) -> str:
+    """
+    Normalize date strings like '10/31/2025' to ISO format '2025-10-31'.
+    Returns the original string if parsing fails.
+    """
+    for fmt in ("%m/%d/%Y", "%m-%d-%Y", "%Y-%m-%d"):
+        try:
+            dt = datetime.datetime.strptime(date_str.strip(), fmt)
+            return dt.date().isoformat()
+        except Exception:
+            continue
+    return date_str.strip()
+
+def _safe_float(val):
+    try:
+        return float(val.replace(",", "").replace("$", "").strip())
+    except Exception:
+        return None
 
 
 def _extract_from_filing_text(text: str) -> FormEntry:
@@ -553,5 +567,16 @@ def _extract_from_filing_text(text: str) -> FormEntry:
                 out["ticker"] = ticker
         except Exception:
             logger.debug("ticker lookup failed for issuer: %s", issuer)
+
+    # After extracting fields from the table:
+    if out.get("approximate_date_of_sale"):
+        out["approximate_date_of_sale"] = _normalize_date(out["approximate_date_of_sale"])
+
+    # Round computed price to 2 decimals if present
+    if out.get("price") is not None:
+        try:
+            out["price"] = round(float(out["price"]), 2)
+        except Exception:
+            pass
 
     return out
