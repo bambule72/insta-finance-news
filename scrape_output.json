@@ -2,6 +2,24 @@
   {
     "form_type": "144",
     "transaction_type": "sell",
+    "shares": 3110,
+    "price": 25.63,
+    "value": 79709.3,
+    "reporting_owner": "Trachtman Cohen Sharon",
+    "approximate_date_of_sale": "2025-11-03",
+    "securities_exchange": "NASDAQ",
+    "shares_outstanding": 42554602,
+    "issuer_name": "RADWARE LTD",
+    "ticker": "RDWR",
+    "filing_date": null,
+    "accepted_date": null,
+    "index_url": "https://www.sec.gov/Archives/edgar/data/1969937/000197640825000342/0001976408-25-000342-index.htm",
+    "document_url": "https://www.sec.gov/Archives/edgar/data/1094366/000197640825000342/xsl144X01/primary_doc.xml",
+    "source": "sec_form_144"
+  },
+  {
+    "form_type": "144",
+    "transaction_type": "sell",
     "shares": 16000,
     "price": 4.17,
     "value": 66640.0,
@@ -11,6 +29,8 @@
     "shares_outstanding": 70380570,
     "issuer_name": "Alpha Tau Medical Ltd.",
     "ticker": "DRTS",
+    "filing_date": null,
+    "accepted_date": null,
     "index_url": "https://www.sec.gov/Archives/edgar/data/1968258/000197640825000341/0001976408-25-000341-index.htm",
     "document_url": "https://www.sec.gov/Archives/edgar/data/1871321/000197640825000341/xsl144X01/primary_doc.xml",
     "source": "sec_form_144"
@@ -27,6 +47,8 @@
     "shares_outstanding": 30562644,
     "issuer_name": "Dorman Products, Inc.",
     "ticker": "DORM",
+    "filing_date": null,
+    "accepted_date": null,
     "index_url": "https://www.sec.gov/Archives/edgar/data/1769146/000095013025000227/0000950130-25-000227-index.htm",
     "document_url": "https://www.sec.gov/Archives/edgar/data/868780/000095013025000227/xsl144X01/primary_doc.xml",
     "source": "sec_form_144"
@@ -43,6 +65,8 @@
     "shares_outstanding": 706349563,
     "issuer_name": "DANAHER CORP /DE/",
     "ticker": "DHR",
+    "filing_date": null,
+    "accepted_date": null,
     "index_url": "https://www.sec.gov/Archives/edgar/data/1015014/000119312525261101/0001193125-25-261101-index.htm",
     "document_url": "https://www.sec.gov/Archives/edgar/data/313616/000119312525261101/xsl144X01/primary_doc.xml",
     "source": "sec_form_144"
@@ -59,6 +83,8 @@
     "shares_outstanding": 147983775,
     "issuer_name": "Alphatec Holdings Inc",
     "ticker": null,
+    "filing_date": null,
+    "accepted_date": null,
     "index_url": "https://www.sec.gov/Archives/edgar/data/1509282/000150928225000006/0001509282-25-000006-index.htm",
     "document_url": "https://www.sec.gov/Archives/edgar/data/1350653/000150928225000006/xsl144X01/primary_doc.xml",
     "source": "sec_form_144"
@@ -75,6 +101,8 @@
     "shares_outstanding": 1224055508,
     "issuer_name": "AMPHENOL CORPORATION",
     "ticker": null,
+    "filing_date": null,
+    "accepted_date": null,
     "index_url": "https://www.sec.gov/Archives/edgar/data/1648860/000195004725008339/0001950047-25-008339-index.htm",
     "document_url": "https://www.sec.gov/Archives/edgar/data/820313/000195004725008339/xsl144X01/primary_doc.xml",
     "source": "sec_form_144"
@@ -91,6 +119,8 @@
     "shares_outstanding": 141423193,
     "issuer_name": "Carvana Co",
     "ticker": "CVNA",
+    "filing_date": null,
+    "accepted_date": null,
     "index_url": "https://www.sec.gov/Archives/edgar/data/1700542/000195004725008338/0001950047-25-008338-index.htm",
     "document_url": "https://www.sec.gov/Archives/edgar/data/1690820/000195004725008338/xsl144X01/primary_doc.xml",
     "source": "sec_form_144"
@@ -107,6 +137,8 @@
     "shares_outstanding": 45161019,
     "issuer_name": "Kiniksa Pharmaceuticals International, plc",
     "ticker": "KNSA",
+    "filing_date": null,
+    "accepted_date": null,
     "index_url": "https://www.sec.gov/Archives/edgar/data/1741533/000192109425001307/0001921094-25-001307-index.htm",
     "document_url": "https://www.sec.gov/Archives/edgar/data/1730430/000192109425001307/xsl144X01/primary_doc.xml",
     "source": "sec_form_144"
@@ -123,6 +155,8 @@
     "shares_outstanding": 208361696,
     "issuer_name": "FOX CORPORATION",
     "ticker": "FOXA",
+    "filing_date": null,
+    "accepted_date": null,
     "index_url": "https://www.sec.gov/Archives/edgar/data/1769066/000195004725008337/0001950047-25-008337-index.htm",
     "document_url": "https://www.sec.gov/Archives/edgar/data/1754301/000195004725008337/xsl144X01/primary_doc.xml",
     "source": "sec_form_144"
@@ -139,6 +173,8 @@
     "shares_outstanding": 7231035,
     "issuer_name": "GRAYSCALE SOLANA TRUST (SOL)",
     "ticker": "GSOL",
+    "filing_date": null,
+    "accepted_date": null,
     "index_url": "https://www.sec.gov/Archives/edgar/data/1896677/000165253625000119/0001652536-25-000119-index.htm",
     "document_url": "https://www.sec.gov/Archives/edgar/data/1652536/000165253625000119/xsl144X01/primary_doc.xml",
     "source": "sec_form_144"
@@ -155,6 +191,8 @@
     "shares_outstanding": 2373400,
     "issuer_name": "GRAYSCALE FILECOIN TRUST (FIL)",
     "ticker": "FILG",
+    "filing_date": null,
+    "accepted_date": null,
     "index_url": "https://www.sec.gov/Archives/edgar/data/1852039/000165253625000120/0001652536-25-000120-index.htm",
     "document_url": "https://www.sec.gov/Archives/edgar/data/1652536/000165253625000120/xsl144X01/primary_doc.xml",
     "source": "sec_form_144"

@@ -70,7 +70,6 @@ def fetch_sec_form(
                 date_val = getattr(entry, date_field)
                 if date_val:
                     accepted_date = date_val
-                    logger.debug(f"Found date in {date_field}: {date_val}")
                     break
         
         # Normalize the date to ISO format if present
@@ -116,8 +115,8 @@ def fetch_sec_form(
             # Parse the filing
             parsed_entry = parser.parse(filing_html, index_url, doc_url)
             
-            # Add accepted_date if we found it
-            if accepted_date and 'accepted_date' not in parsed_entry:
+            # Add accepted_date if we found it (overwrite even if None was set)
+            if accepted_date:
                 parsed_entry['accepted_date'] = accepted_date
             
             # Only include entries with at least some data
