@@ -280,8 +280,7 @@ def _safe_int(s: str) -> Optional[int]:
 def _extract_from_filing_text(text: str) -> FormEntry:
     """Extract transaction details from filing content. Simpler, robust implementation.
 
-    This keeps the previous behavior but fixes syntax/indentation and removes
-    the redundant `total_value` field. It prefers structured parsing via
+    This keeps the previous behavior but fixes syntax/indentation. It prefers structured parsing via
     lxml when available, but falls back to conservative text-based regex
     extraction which is sufficient for tests and CLI usage.
     """
@@ -485,12 +484,26 @@ def _extract_from_filing_text(text: str) -> FormEntry:
     if m and out.get('shares_outstanding') is None:
         out["shares_outstanding"] = _safe_int(m.group(1))
 
-    # Compute value if missing but we have shares and price
+    # Compute value if missing but we have shares and price.
+    # Also compute per-share price if it's missing but we have aggregate value and shares.
     try:
-        if out.get("value") is None and out.get("shares") is not None and out.get("price") is not None:
-            shares = out.get("shares")
-            price = out.get("price")
+        shares = out.get("shares")
+        price = out.get("price")
+        value = out.get("value")
+
+        # If value missing but shares & price present, compute value
+        if value is None and shares is not None and price is not None:
             out["value"] = float(shares) * float(price)
+            value = out["value"]
+
+        # If price missing but value & shares present and shares != 0, compute price
+        if price is None and shares is not None and value is not None:
+            try:
+                if float(shares) != 0:
+                    out["price"] = float(value) / float(shares)
+            except Exception:
+                # guard against weird types/values; leave price as None on failure
+                pass
     except Exception:
         pass
 
