@@ -1,7 +1,8 @@
 """Generic SEC form fetcher - fetches and parses any supported SEC form type."""
 
 from __future__ import annotations
-from typing import List, TypeVar, Dict, Any
+from typing import List, Dict, Any
+from datetime import datetime
 import feedparser
 import requests
 
@@ -9,8 +10,6 @@ from .parsers import get_parser
 from .logger import setup_logger
 
 logger = setup_logger(__name__)
-
-T = TypeVar('T', bound=Dict[str, Any])
 
 
 def fetch_sec_form(
@@ -46,8 +45,11 @@ def fetch_sec_form(
         resp = session.get(feed_url, timeout=10, headers=headers)
         resp.raise_for_status()
         feed_body = resp.text
-    except Exception as e:
+    except requests.exceptions.RequestException as e:
         logger.error(f"Failed to fetch feed {feed_url}: {e}")
+        return []
+    except Exception as e:
+        logger.error(f"Unexpected error fetching feed {feed_url}: {e}")
         return []
     
     # Parse the feed
@@ -75,9 +77,6 @@ def fetch_sec_form(
         # Normalize the date to ISO format if present
         if accepted_date:
             try:
-                from datetime import datetime
-                import time as time_module
-                
                 # If it's a time struct, convert it
                 if hasattr(accepted_date, 'tm_year'):
                     dt = datetime(*accepted_date[:6])
@@ -90,7 +89,7 @@ def fetch_sec_form(
                             dt = datetime.strptime(accepted_date, fmt)
                             accepted_date = dt.isoformat()
                             break
-                        except Exception:
+                        except (ValueError, TypeError):
                             continue
             except Exception as e:
                 logger.debug(f"Date parsing failed: {e}, keeping original: {accepted_date}")
@@ -123,8 +122,11 @@ def fetch_sec_form(
             if parsed_entry and any(v is not None for v in parsed_entry.values()):
                 results.append(parsed_entry)
                 
+        except requests.exceptions.RequestException as e:
+            logger.debug(f"Network error processing entry {index_url}: {e}")
+            continue
         except Exception as e:
-            logger.debug(f"Failed to process entry {index_url}: {e}")
+            logger.warning(f"Failed to process entry {index_url}: {e}")
             continue
     
     # Deduplicate by document URL

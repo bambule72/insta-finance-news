@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import pytest
-from src.news_scraper.scraper import get_latest_sec_form_144, _dedup_form144_entries
+from src.news_scraper.form_fetcher import fetch_sec_form, _deduplicate_entries
 
 # Sample filing items with duplicate document URLs
 SAMPLE_FILINGS = [
@@ -56,7 +56,7 @@ SAMPLE_FILINGS = [
 
 def test_dedup_form144_entries():
     """Test that filings are deduped properly by document URL."""
-    deduped = _dedup_form144_entries(SAMPLE_FILINGS)
+    deduped = _deduplicate_entries(SAMPLE_FILINGS)
 
     # Should keep 3 unique entries (by document_url)
     assert len(deduped) == 3

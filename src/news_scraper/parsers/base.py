@@ -5,9 +5,8 @@ from abc import ABC, abstractmethod
 from typing import Dict, Optional, Any
 import re
 import datetime
-import requests
-from bs4 import BeautifulSoup
 import urllib.parse
+from bs4 import BeautifulSoup
 
 from ..logger import setup_logger
 

@@ -6,7 +6,24 @@ The scraper has been refactored into a modular parser architecture that makes it
 
 ## Architecture Components
 
-### 1. Base Parser (`src/news_scraper/parsers/base.py`)
+### 1. Generic Form Fetcher (`src/news_scraper/form_fetcher.py`)
+
+The generic form fetcher handles fetching and parsing ANY SEC form type:
+
+**Key Function:**
+
+- `fetch_sec_form(form_type, limit)` - Fetches RSS feed, parses entries using appropriate parser
+- `_deduplicate_entries(entries)` - Removes duplicate filings based on `document_url`
+
+**Features:**
+
+- Works with any registered form type (144, 8-K, 4, etc.)
+- Captures `accepted_date` from RSS feed metadata
+- Automatic deduplication
+- Proper error handling with `RequestException`
+- Session management for HTTP requests
+
+### 2. Base Parser (`src/news_scraper/parsers/base.py`)
 
 The `BaseFormParser` abstract base class provides:
 
@@ -24,7 +41,7 @@ The `BaseFormParser` abstract base class provides:
 - `find_filing_document_link()` - Extract filing URL from index page
 - `lookup_ticker()` - Lookup ticker symbol by company name
 
-### 2. Form-Specific Parsers
+### 3. Form-Specific Parsers
 
 Each SEC form type has its own parser class:
 
@@ -32,6 +49,8 @@ Each SEC form type has its own parser class:
 
 - Handles insider intent to sell filings
 - Extracts: shares, price, value, reporting owner, dates, exchange
+- **Normalizes dates to ISO 8601 format** (YYYY-MM-DD)
+- **Rounds prices to 2 decimal places**
 - Auto-registers with the parser registry
 
 **Future Parsers:**
@@ -40,14 +59,18 @@ Each SEC form type has its own parser class:
 - Form 4 - Insider transactions (to be implemented)
 - Form 13D - Activist ownership (to be implemented)
 
-### 3. Parser Registry (`src/news_scraper/parsers/__init__.py`)
+### 4. Parser Registry (`src/news_scraper/parsers/__init__.py`)
 
 The registry manages form-specific parsers:
 
 ```python
 from src.news_scraper.parsers import get_parser
+from src.news_scraper.form_fetcher import fetch_sec_form
 
-# Get a parser for Form 144
+# Fetch Form 144 filings (uses registered Form144Parser automatically)
+filings = fetch_sec_form("144", limit=10)
+
+# Or use parser directly
 parser = get_parser("144")
 result = parser.parse(html, index_url, doc_url)
 ```
@@ -58,23 +81,30 @@ result = parser.parse(html, index_url, doc_url)
 - `get_parser(form_type)` - Get parser instance for a form type
 - `get_supported_forms()` - List all supported form types
 
-### 4. Type System (`src/news_scraper/scraper_types.py`)
+### 5. Type System (`src/news_scraper/scraper_types.py`)
 
 Structured type definitions using TypedDict:
 
 **Base Types:**
 
-- `BaseFormEntry` - Common fields (issuer, ticker, URLs, dates)
+- `BaseFormEntry` - Common fields (issuer, ticker, URLs, accepted_date)
 
 **Form-Specific Types:**
 
-- `Form144Entry` - Extends base with shares, price, value, owner
+- `Form144Entry` - Extends base with shares, price, value, owner, transaction dates
 - `Form8KEntry` - Extends base with event type, description (future)
 - `Form4Entry` - Extends base with transaction details (future)
 
 **Union Type:**
 
 - `FormEntry` - Union of all form types for flexibility
+
+**Key Fields:**
+
+- `accepted_date` - ISO 8601 timestamp from SEC RSS feed (e.g., "2025-01-15T14:30:00-05:00")
+- `date_of_transaction` - Normalized to ISO 8601 date format (e.g., "2025-01-15")
+- `price` - Rounded to 2 decimal places
+- `document_url` - Used for deduplication
 
 ## How to Add a New Form Parser
 
@@ -132,32 +162,31 @@ Update the FormEntry union:
 FormEntry = Union[Form144Entry, Form8KEntry, Form4Entry]
 ```
 
-### Step 3: Add RSS Feed Configuration
+### Step 3: Use Generic Form Fetcher
 
-Update `src/news_scraper/scraper.py`:
+The generic fetcher automatically handles RSS parsing and deduplication:
 
 ```python
-RSS_FEEDS = {
-    "sec_form_144": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&type=144&output=atom",
-    "sec_form_8k": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&type=8-K&output=atom",
-}
+from src.news_scraper.form_fetcher import fetch_sec_form
+
+# That's it! The fetcher will:
+# - Look up your registered parser
+# - Fetch the RSS feed for Form 8-K
+# - Parse each entry using Form8KParser
+# - Deduplicate by document_url
+# - Populate accepted_date from RSS metadata
+filings = fetch_sec_form("8-K", limit=10)
 ```
 
-### Step 4: Create Scraper Function
-
-Add a new function in `scraper.py`:
+Or add a convenience function in `scraper.py`:
 
 ```python
 def get_latest_sec_form_8k(limit: int = 10) -> List[Form8KEntry]:
-    """Fetch the SEC Form 8-K atom feed and parse filings."""
-    session = requests.Session()
-    feed_url = RSS_FEEDS.get('sec_form_8k')
-    # ... similar to get_latest_sec_form_144
-    parser = get_parser("8-K")
-    # ... use parser.parse()
+    """Fetch the latest SEC Form 8-K filings."""
+    return fetch_sec_form("8-K", limit)
 ```
 
-### Step 5: Add Tests
+### Step 4: Add Tests
 
 Create `tests/test_form8k.py`:
 
@@ -179,26 +208,33 @@ def test_form8k_parsing():
 4. **Extensibility**: Add new forms without modifying existing code
 5. **Type Safety**: Strong typing with TypedDict for each form
 6. **Maintainability**: Clear separation of concerns
+7. **DRY Principle**: Generic form fetcher eliminates code duplication
+8. **Automatic Features**: New parsers automatically get deduplication, RSS parsing, and accepted_date population
 
 ## Current Status
 
 ✅ **Implemented:**
 
-- Base parser infrastructure
-- Form 144 parser
-- Parser registry
-- Type system
-- All tests passing
+- Generic form fetcher (`form_fetcher.py`)
+- Base parser infrastructure with shared utilities
+- Form 144 parser with date normalization and price rounding
+- Parser registry with auto-registration
+- Type system with BaseFormEntry and Form144Entry
+- Automatic deduplication by document_url
+- accepted_date field from RSS feed metadata
+- All tests passing (9/9)
 
 🔜 **Next Steps:**
 
 - Implement Form 8-K parser (highest market impact)
 - Implement Form 4 parser (insider trading)
 - Implement Form 13D parser (activist ownership)
-- Add form-specific test fixtures
+- Add form-specific test fixtures for new parsers
 
 ## References
 
 - [SEC Forms Overview](sec-forms-overview.md) - Market impact ranking
+- [Generic Form Fetcher](../src/news_scraper/form_fetcher.py) - Handles any SEC form type
 - [Base Parser](../src/news_scraper/parsers/base.py) - Shared utilities
 - [Form 144 Parser](../src/news_scraper/parsers/form144.py) - Example implementation
+- [Parser Registry](../src/news_scraper/parsers/__init__.py) - Parser registration and lookup
