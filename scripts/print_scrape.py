@@ -13,7 +13,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from src.news_scraper.scraper import get_latest_news
+from src.news_scraper.scraper import get_latest_news, get_latest_sec_form_144
 from src.news_scraper.logger import setup_logger
 
 
@@ -25,8 +25,9 @@ def main() -> int:
     p.add_argument("--out", "-o", help="Write results to this JSON file", default=None)
     args = p.parse_args()
 
-    logger.info("Running scraper for Bloomberg, MarketWatch, CNBC")
-    items = get_latest_news()
+    logger.info("Running SEC Form 144 scraper")
+    # Use the SEC Form 144 flow to get structured filing items
+    items = get_latest_sec_form_144(limit=20)
     print(json.dumps(items, indent=2, ensure_ascii=False))
 
     if args.out:
