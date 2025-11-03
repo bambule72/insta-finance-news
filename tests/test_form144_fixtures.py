@@ -1,7 +1,7 @@
 import glob
 import os
 
-from src.news_scraper import scraper
+from src.news_scraper.parsers.form144 import Form144Parser
 
 
 def test_form144_fixtures_extraction():
@@ -14,11 +14,12 @@ def test_form144_fixtures_extraction():
     files = sorted(glob.glob(os.path.join(base, "entry_*.html")))
     assert files, f"No fixtures found in {base}"
 
+    parser = Form144Parser()
     failures = []
     for fp in files:
         with open(fp, "r", encoding="utf-8", errors="ignore") as fh:
             txt = fh.read()
-        out = scraper._extract_from_filing_text(txt)
+        out = parser.parse(txt, "http://example.com/index", "http://example.com/doc")
         # consider extraction successful if any of these fields is present
         if not any(out.get(k) for k in ("shares", "value", "price", "approximate_date_of_sale")):
             failures.append((os.path.basename(fp), out))

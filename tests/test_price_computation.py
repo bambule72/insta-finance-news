@@ -1,4 +1,4 @@
-from src.news_scraper.scraper import _extract_from_filing_text
+from src.news_scraper.parsers.form144 import Form144Parser
 
 
 def test_price_computed_from_value_and_shares():
@@ -10,7 +10,8 @@ def test_price_computed_from_value_and_shares():
     </table>
     </body></html>
     '''
-    out = _extract_from_filing_text(html)
+    parser = Form144Parser()
+    out = parser.parse(html, "http://example.com/index", "http://example.com/doc")
     # shares and value should be parsed
     assert out.get('shares') == 1000
     assert out.get('value') == 50000.0
@@ -30,7 +31,8 @@ def test_price_computed_when_value_present_but_price_missing_and_shares_nonzero(
     </table>
     </body></html>
     '''
-    out = _extract_from_filing_text(html)
+    parser = Form144Parser()
+    out = parser.parse(html, "http://example.com/index", "http://example.com/doc")
     assert out.get('shares') == 2500
     assert out.get('value') == 125000.0
     assert out.get('price') == 50.0
