@@ -1,7 +1,7 @@
 """Form 144 parser - Insider intent to sell restricted/control securities."""
 
 from __future__ import annotations
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, cast
 import re
 from lxml import etree, html
 from bs4 import BeautifulSoup
@@ -30,7 +30,7 @@ class Form144Parser(BaseFormParser):
     def form_type(self) -> str:
         return "144"
     
-    def parse(self, filing_html: str, index_url: str, document_url: str) -> Form144Entry:
+    def parse(self, filing_html: str, index_url: str, document_url: str) -> Dict[str, Any]:
         """Parse Form 144 filing and extract transaction details.
         
         Args:
@@ -88,7 +88,7 @@ class Form144Parser(BaseFormParser):
         self._normalize_fields(out)
         self._lookup_ticker_if_needed(out)
         
-        return out
+        return cast(Dict[str, Any], out)
     
     def _extract_issuer_name(self, root, out: Form144Entry) -> None:
         """Extract issuer name from the document."""

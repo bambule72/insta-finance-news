@@ -74,12 +74,18 @@ def _request_with_retries(url: str, session: requests.Session | None = None, ret
             # support DummyResponse used in tests
             if hasattr(resp, "raise_for_status"):
                 resp.raise_for_status()
-            return getattr(resp, "text", resp)
+            text = getattr(resp, "text", resp)
+            return str(text)
         except Exception as e:
             last_exc = e
             if attempt == retries:
                 raise
             time.sleep(backoff * (2 ** (attempt - 1)))
+    
+    # If we get here, raise the last exception (shouldn't happen but satisfies type checker)
+    if last_exc:
+        raise last_exc
+    return ""  # Fallback for type checker
 
 
 def _fetch_rss(source_key: str, session: requests.Session | None = None, max_items: int = 10) -> List[Dict]:
