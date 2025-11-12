@@ -52,12 +52,12 @@ def scrape_news(request: Request):
 
 if __name__ == "__main__":
     # Local runner via Functions Framework: `functions-framework --target=scrape_news`
-    from flask import Flask
+    from flask import Flask, request as flask_request
 
     app = Flask(__name__)
 
     @app.route("/")
     def _():
-        return scrape_news(None)
+        return scrape_news(flask_request)
 
     app.run(debug=True, port=8080)
