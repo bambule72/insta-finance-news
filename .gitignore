@@ -21,3 +21,21 @@ dist/
 
 # Logs
 .log
+
+# Ethereum/Hardhat
+contracts/ethereum/node_modules/
+contracts/ethereum/.env
+contracts/ethereum/cache/
+contracts/ethereum/artifacts/
+contracts/ethereum/coverage/
+contracts/ethereum/typechain-types/
+
+# Solana/Anchor
+contracts/solana/target/
+contracts/solana/.anchor/
+contracts/solana/test-ledger/
+contracts/solana/Anchor.lock
+
+# Rust
+contracts/solana/**/*.rs.bk
+contracts/solana/Cargo.lock
