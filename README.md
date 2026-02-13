@@ -192,3 +192,4 @@ IGNORE_ROBOTS=1
 - [Parser Architecture](docs/parser-architecture.md) - Detailed guide on the modular parser system
 - [SEC Forms Overview](docs/sec-forms-overview.md) - Market impact ranking of different SEC forms
 - [Deployment Guide](docs/deploy.md) - Instructions for deploying to Google Cloud Functions
+- [Security Logging](docs/security-logging.md) - Enhanced security event logging for audit trails and monitoring
