@@ -7,9 +7,10 @@ import feedparser
 import requests
 
 from .parsers import get_parser
-from .logger import setup_logger
+from .logger import setup_logger, get_security_logger
 
 logger = setup_logger(__name__)
+security_logger = get_security_logger()
 
 
 def fetch_sec_form(
@@ -33,11 +34,23 @@ def fetch_sec_form(
     """
     session = session or requests.Session()
     
+    # Log SEC form access
+    security_logger.log_api_access(
+        feed_url,
+        headers,
+        f"fetching_sec_form_{form_type}"
+    )
+    
     # Get the appropriate parser for this form type
     try:
         parser = get_parser(form_type)
     except ValueError as e:
         logger.error(f"No parser available for form type {form_type}: {e}")
+        security_logger.log_security_error(
+            "parser_not_found",
+            f"No parser for form type {form_type}",
+            {"form_type": form_type, "error": str(e)}
+        )
         return []
     
     # Fetch the RSS/Atom feed
@@ -45,11 +58,28 @@ def fetch_sec_form(
         resp = session.get(feed_url, timeout=10, headers=headers)
         resp.raise_for_status()
         feed_body = resp.text
+        
+        # Log successful feed fetch
+        security_logger.log_api_access(
+            feed_url,
+            headers,
+            f"success_status_{resp.status_code}"
+        )
     except requests.exceptions.RequestException as e:
         logger.error(f"Failed to fetch feed {feed_url}: {e}")
+        security_logger.log_security_error(
+            "feed_fetch_failed",
+            f"Failed to fetch SEC feed",
+            {"feed_url": feed_url, "form_type": form_type, "error": str(e)}
+        )
         return []
     except Exception as e:
         logger.error(f"Unexpected error fetching feed {feed_url}: {e}")
+        security_logger.log_security_error(
+            "unexpected_error",
+            f"Unexpected error fetching SEC feed",
+            {"feed_url": feed_url, "form_type": form_type, "error": str(e)}
+        )
         return []
     
     # Parse the feed

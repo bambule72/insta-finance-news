@@ -16,7 +16,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from .scraper_types import FormEntry, Form144Entry
-from .logger import setup_logger
+from .logger import setup_logger, get_security_logger
 from .form_fetcher import fetch_sec_form
 
 # Import parsers to register them
@@ -24,6 +24,7 @@ from .parsers.form144 import Form144Parser
 from .parsers import get_parser
 
 logger = setup_logger(__name__)
+security_logger = get_security_logger()
 
 try:
     import redis as _redis  # type: ignore
@@ -66,6 +67,9 @@ def _throttle_for_host(url: str) -> None:
 
 def _request_with_retries(url: str, session: requests.Session | None = None, retries: int = 3, backoff: float = 1.0, headers: Dict | None = None) -> str:
     """Simple request helper used by tests. Accepts a session-like object exposing get()."""
+    # Log API access with security context
+    security_logger.log_api_access(url, headers)
+    
     session = session or requests.Session()
     last_exc = None
     for attempt in range(1, retries + 1):
@@ -75,10 +79,22 @@ def _request_with_retries(url: str, session: requests.Session | None = None, ret
             if hasattr(resp, "raise_for_status"):
                 resp.raise_for_status()
             text = getattr(resp, "text", resp)
+            
+            # Log successful access
+            status_code = getattr(resp, "status_code", None)
+            if status_code:
+                security_logger.log_api_access(url, headers, f"success_status_{status_code}")
+            
             return str(text)
         except Exception as e:
             last_exc = e
             if attempt == retries:
+                # Log final failure
+                security_logger.log_security_error(
+                    "request_failed",
+                    f"Failed after {retries} attempts",
+                    {"url": url, "error": str(e)}
+                )
                 raise
             time.sleep(backoff * (2 ** (attempt - 1)))
     
